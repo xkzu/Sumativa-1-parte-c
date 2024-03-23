@@ -14,4 +14,6 @@ public class Comment {
     private String comments;
 
     private Date date;
+
+    private User user;
 }
