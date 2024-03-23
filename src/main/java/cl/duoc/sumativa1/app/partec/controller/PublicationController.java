@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class PublicationController {
@@ -32,5 +33,10 @@ public class PublicationController {
     @GetMapping("/publications/{id}")
     public ResponseEntity<Publishing> getPublication(@PathVariable int id) {
         return ResponseEntity.ok(publication.getPublication(id));
+    }
+
+    @GetMapping("/publications/average/{id}")
+    public ResponseEntity<Map<String, String>> getPublicationAverage(@PathVariable int id) {
+        return ResponseEntity.ok(publication.getAverage(id));
     }
 }
