@@ -13,6 +13,16 @@ public class PublicationImpl implements Publication {
         return getPublishingData();
     }
 
+    @Override
+    public Publishing getPublication(int id) {
+        for (Publishing publishing: getPublishingData()) {
+            if (id == publishing.getId()) {
+                return publishing;
+            }
+        }
+        return null;
+    }
+
     // USEMOS LUEGO BD PROFE :c
     private List<Publishing> getPublishingData() {
 
