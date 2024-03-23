@@ -9,18 +9,16 @@ import java.util.List;
 @Data
 public class Publishing {
 
-    private Long id;
+    private int id;
 
-    //persona que realiza la publicación
-    private User user;
+    private String user;
 
     private String title;
 
     private String content;
 
-    //lista con los comentarios
-    private List<Comment> comments;
+    private List<String> comment;
 
     //lista con las calificaciones
-    private List<Qualification> qualifications;
+    private List<Double> qualifications;
 }
