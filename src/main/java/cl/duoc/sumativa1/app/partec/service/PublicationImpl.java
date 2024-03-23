@@ -4,7 +4,9 @@ import cl.duoc.sumativa1.app.partec.model.Publishing;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PublicationImpl implements Publication {
@@ -21,6 +23,30 @@ public class PublicationImpl implements Publication {
             }
         }
         return null;
+    }
+
+    @Override
+    public Map<String, String> getAverage(int id) {
+        Map<String, String> averageResponse = new HashMap<>();
+
+        Publishing publishing = getPublication(id);
+
+        averageResponse.put("id", String.valueOf(publishing.getId()));
+        averageResponse.put("user", publishing.getUser());
+        averageResponse.put("title", publishing.getTitle());
+        averageResponse.put("content", publishing.getContent());
+        averageResponse.put("comment", publishing.getComment().toString());
+        averageResponse.put("qualifications", publishing.getQualifications().toString());
+        averageResponse.put("average", String.valueOf(getAverageCalculate(publishing.getQualifications())));
+        return averageResponse;
+    }
+
+    private Double getAverageCalculate(List<Double> qualifications) {
+        double sum = 0.0;
+        for (Double value: qualifications) {
+            sum += value;
+        }
+        return sum / qualifications.size();
     }
 
     // USEMOS LUEGO BD PROFE :c
