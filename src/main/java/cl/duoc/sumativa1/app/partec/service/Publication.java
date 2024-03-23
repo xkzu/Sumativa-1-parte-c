@@ -7,4 +7,6 @@ import java.util.List;
 public interface Publication {
 
     List<Publishing> getPublications();
+
+    Publishing getPublication(int id);
 }
