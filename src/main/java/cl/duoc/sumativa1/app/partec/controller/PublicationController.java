@@ -5,6 +5,7 @@ import cl.duoc.sumativa1.app.partec.service.Publication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -26,5 +27,10 @@ public class PublicationController {
     @GetMapping("/publications")
     public ResponseEntity<List<Publishing>> publications() {
         return ResponseEntity.ok(publication.getPublications());
+    }
+
+    @GetMapping("/publications/{id}")
+    public ResponseEntity<Publishing> getPublication(@PathVariable int id) {
+        return ResponseEntity.ok(publication.getPublication(id));
     }
 }
