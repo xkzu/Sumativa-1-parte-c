@@ -2,7 +2,9 @@ package cl.duoc.sumativa1.app.partec.controller;
 
 import cl.duoc.sumativa1.app.partec.model.Publication;
 import cl.duoc.sumativa1.app.partec.model.PublicationResponse;
+import cl.duoc.sumativa1.app.partec.model.PublicationsResponse;
 import cl.duoc.sumativa1.app.partec.service.PublicationService;
+import cl.duoc.sumativa1.app.partec.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,27 +31,41 @@ public class PublicationController {
         datos que ingresarán y la generación de promedios de calificaciones de las publicaciones.
     */
     @GetMapping("/publications")
-    public ResponseEntity<List<PublicationResponse>> publications() {
+    public ResponseEntity<List<PublicationsResponse>> publications() {
         try {
             List<Publication> publicationList = publicationService.getPublications();
             if (publicationList.isEmpty()) {
                 return ResponseEntity.ofNullable(Collections.singletonList(
-                        new PublicationResponse("Success", publicationList)));
+                        new PublicationsResponse(Constant.SUCCESS, publicationList)));
             }
             return ResponseEntity.ok(Collections.singletonList(
-                    new PublicationResponse("Success", publicationList)));
+                    new PublicationsResponse(Constant.SUCCESS, publicationList)));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Collections.singletonList(
-                    new PublicationResponse(
-                            "No se encontraron publicaciones en la bd " + e.getMessage(),
+                    new PublicationsResponse(
+                            "Error al obtener publicaciones de la bd " + e.getMessage(),
                             null)));
         }
 
     }
 
     @GetMapping("/publications/{id}")
-    public ResponseEntity<Optional<Publication>> getPublication(@PathVariable Long id) {
-        return ResponseEntity.ok(publicationService.getPublication(id));
+    public ResponseEntity<Optional<PublicationResponse>> getPublication(@PathVariable Long id) {
+        try {
+            if (null == id) {
+                return ResponseEntity.badRequest().body(Optional.of(
+                        new PublicationResponse("id no puede ser null", null)));
+            }
+            Optional<Publication> publication = publicationService.getPublication(id);
+            if (publication.isEmpty()) {
+                return ResponseEntity.ofNullable(Optional.of(new PublicationResponse(
+                        "No se encontró publicación", publication)));
+            }
+            return ResponseEntity.ok(Optional.of(new PublicationResponse(Constant.SUCCESS, publication)));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Optional.of(
+                    new PublicationResponse("Error al obtener publicación " + e.getMessage(), null)));
+        }
     }
 
     @GetMapping("/publications/average/{id}")
