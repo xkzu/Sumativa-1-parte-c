@@ -32,4 +32,9 @@ public class PublicationServiceImpl implements PublicationService {
         return repository.save(publication);
     }
 
+    @Override
+    public Publication updatePublication(Publication publication) {
+        return repository.saveAndFlush(publication);
+    }
+
 }
