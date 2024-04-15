@@ -5,10 +5,13 @@ import cl.duoc.sumativa1.app.partec.model.PublicationResponse;
 import cl.duoc.sumativa1.app.partec.model.PublicationsResponse;
 import cl.duoc.sumativa1.app.partec.service.PublicationService;
 import cl.duoc.sumativa1.app.partec.util.Constant;
+import cl.duoc.sumativa1.app.partec.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
@@ -65,6 +68,24 @@ public class PublicationController {
             return ResponseEntity.internalServerError().body(Optional.of(
                     new PublicationResponse("Error al obtener publicación " + e.getMessage(), null)));
         }
+    }
+
+    @PostMapping("/publications/add")
+    public ResponseEntity<PublicationResponse> addPublication(@RequestBody Publication publication) {
+        try {
+            if (ValidateUtil.isEmptyOrNull(publication.getTitle())
+                    || ValidateUtil.isEmptyOrNull(publication.getUser())
+                    || ValidateUtil.isEmptyOrNull(publication.getContent())) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "Title, user, content no pueden ser null o vacío", null));
+            }
+            return ResponseEntity.ok(new PublicationResponse(
+                    Constant.SUCCESS, Optional.of(publicationService.addPublication(publication))));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al ingresar la publicación " + e.getMessage(), null));
+        }
+
     }
 
 }
