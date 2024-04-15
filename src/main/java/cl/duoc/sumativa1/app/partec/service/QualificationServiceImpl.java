@@ -28,4 +28,14 @@ public class QualificationServiceImpl implements QualificationService {
         }
         return Map.of("Promedio", sum / qualifications.size());
     }
+
+    @Override
+    public Qualification add(Qualification qualification) {
+        return qualificationRepository.save(qualification);
+    }
+
+    @Override
+    public List<Qualification> getQualificationsByIdPublication(Long id) {
+        return qualificationRepository.findByIdPublication(id);
+    }
 }
