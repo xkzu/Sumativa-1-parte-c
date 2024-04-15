@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class QualificationServiceImpl implements QualificationService {
@@ -37,5 +38,20 @@ public class QualificationServiceImpl implements QualificationService {
     @Override
     public List<Qualification> getQualificationsByIdPublication(Long id) {
         return qualificationRepository.findByIdPublication(id);
+    }
+
+    @Override
+    public List<Qualification> getQualifications() {
+        return qualificationRepository.findAll();
+    }
+
+    @Override
+    public Optional<Qualification> getQulification(Long id) {
+        return  qualificationRepository.findById(id);
+    }
+
+    @Override
+    public void deleteQualification(Long id) {
+        qualificationRepository.deleteById(id);
     }
 }
