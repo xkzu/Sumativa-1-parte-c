@@ -7,4 +7,6 @@ import java.util.List;
 public interface CommentService {
 
     List<Comment> getCommnetsById(Long id);
+
+    Comment addComment(Comment comment);
 }
