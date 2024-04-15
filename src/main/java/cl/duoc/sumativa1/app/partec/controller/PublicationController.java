@@ -8,6 +8,7 @@ import cl.duoc.sumativa1.app.partec.util.Constant;
 import cl.duoc.sumativa1.app.partec.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,6 +112,27 @@ public class PublicationController {
             return ResponseEntity.internalServerError().body(new PublicationResponse(
                     "Error al actualizar " + e.getMessage(),
                     Optional.of(publicationService.updatePublication(publication))));
+        }
+    }
+
+    @DeleteMapping("/publications/delete/{id}")
+    public ResponseEntity<PublicationResponse> deletePublication(@PathVariable Long id) {
+        try {
+            if (id < 1) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "El id ingresado debe ser mayor a cero", null));
+            }
+            Optional<Publication> publication = publicationService.getPublication(id);
+            if (publication.isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new PublicationResponse("El id ingresado no existe en la bd", null));
+            }
+            publicationService.deletePublication(id);
+            return ResponseEntity.ok(
+                    new PublicationResponse(Constant.SUCCESS, publication));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al eliminar publicación " + e.getMessage(),null));
         }
     }
 
