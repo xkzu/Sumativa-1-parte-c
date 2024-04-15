@@ -7,6 +7,7 @@ import cl.duoc.sumativa1.app.partec.service.PublicationService;
 import cl.duoc.sumativa1.app.partec.util.Constant;
 import cl.duoc.sumativa1.app.partec.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -129,6 +130,12 @@ public class PublicationController {
             publicationService.deletePublication(id);
             return ResponseEntity.ok(
                     new PublicationResponse(Constant.SUCCESS, publication));
+        } catch (DataIntegrityViolationException e) {
+            // debido a que no me queda tiempo, solo valide que no se pueda borar, con mas tiempo implementaria borrar en cascada
+            return ResponseEntity.internalServerError().body(
+                    new PublicationResponse(
+                            "No se puede borrar la publicacion debido a que tiene calificaiones o comentarios",
+                            null));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new PublicationResponse(
                     "Error al eliminar publicación " + e.getMessage(),null));
