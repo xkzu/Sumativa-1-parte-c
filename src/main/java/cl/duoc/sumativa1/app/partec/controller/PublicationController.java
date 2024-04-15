@@ -110,8 +110,7 @@ public class PublicationController {
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(new PublicationResponse(
-                    "Error al actualizar " + e.getMessage(),
-                    Optional.of(publicationService.updatePublication(publication))));
+                    "Error al actualizar " + e.getMessage(),null));
         }
     }
 
