@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -86,6 +87,31 @@ public class PublicationController {
                     "Error al ingresar la publicación " + e.getMessage(), null));
         }
 
+    }
+
+    @PutMapping("/publications/update/{id}")
+    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable Long id, @RequestBody Publication publication) {
+        try {
+            if (id < 1
+                    || ValidateUtil.isEmptyOrNull(publication.getTitle())
+                    || ValidateUtil.isEmptyOrNull(publication.getUser())
+                    || ValidateUtil.isEmptyOrNull(publication.getContent())) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "id, title, user, content no pueden ser null o vacío", null));
+            }
+            if (publicationService.getPublication(id).isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new PublicationResponse("El id ingresado no existe en la bd", null));
+            }
+            publication.setId(id);
+            return ResponseEntity.ok(new PublicationResponse(
+                    Constant.SUCCESS, Optional.of(publicationService.updatePublication(publication))));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al actualizar " + e.getMessage(),
+                    Optional.of(publicationService.updatePublication(publication))));
+        }
     }
 
 }
