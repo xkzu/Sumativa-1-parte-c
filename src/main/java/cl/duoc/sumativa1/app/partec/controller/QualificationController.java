@@ -8,6 +8,7 @@ import cl.duoc.sumativa1.app.partec.service.QualificationService;
 import cl.duoc.sumativa1.app.partec.util.Constant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,6 +80,41 @@ public class QualificationController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new QualificationsResponse("Error al listar las calidicaciones " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("")
+    public ResponseEntity<QualificationsResponse> qualifications() {
+        try {
+            if (qualificationService.getQualifications().isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new QualificationsResponse("No se encuentran calificaciones en la bd", null));
+            }
+            return ResponseEntity.ok(
+                    new QualificationsResponse(Constant.SUCCESS, qualificationService.getQualifications()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new QualificationsResponse("Error al buscar calificaiones en bd " + e.getMessage(), null));
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<QualificationResponse> deleteQualification(@PathVariable Long id) {
+        try {
+            if (id < 1) {
+                return ResponseEntity.badRequest().body(
+                        new QualificationResponse("id no puede ser cero", null));
+            }
+            Optional<Qualification> qualification = qualificationService.getQulification(id);
+            if (qualification.isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new QualificationResponse("No se encuentra este id en la bd", null));
+            }
+            qualificationService.deleteQualification(id);
+            return ResponseEntity.ok(new QualificationResponse(Constant.SUCCESS, qualification));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new QualificationResponse("Error al eliminar qualification " + e.getMessage(), null));
         }
     }
 }
