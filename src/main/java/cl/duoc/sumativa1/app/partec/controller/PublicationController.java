@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -68,8 +67,4 @@ public class PublicationController {
         }
     }
 
-    @GetMapping("/publications/average/{id}")
-    public ResponseEntity<Map<String, String>> getPublicationAverage(@PathVariable Long id) {
-        return ResponseEntity.ok(publicationService.getAverage(id));
-    }
 }
