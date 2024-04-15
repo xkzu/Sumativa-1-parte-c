@@ -12,4 +12,6 @@ public interface PublicationService {
     Optional<Publication> getPublication(Long id);
 
     Publication addPublication(Publication publication);
+
+    Publication updatePublication(Publication publication);
 }
