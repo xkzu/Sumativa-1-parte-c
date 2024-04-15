@@ -1,24 +1,34 @@
 package cl.duoc.sumativa1.app.partec.controller;
 
-import cl.duoc.sumativa1.app.partec.model.Publishing;
-import cl.duoc.sumativa1.app.partec.service.Publication;
+import cl.duoc.sumativa1.app.partec.model.Publication;
+import cl.duoc.sumativa1.app.partec.model.PublicationResponse;
+import cl.duoc.sumativa1.app.partec.model.PublicationsResponse;
+import cl.duoc.sumativa1.app.partec.service.PublicationService;
+import cl.duoc.sumativa1.app.partec.util.Constant;
+import cl.duoc.sumativa1.app.partec.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 public class PublicationController {
 
-    private final Publication publication;
+    private final PublicationService publicationService;
 
     @Autowired
-    public PublicationController(Publication publication) {
-        this.publication = publication;
+    public PublicationController(PublicationService publicationService) {
+        this.publicationService = publicationService;
     }
 
     /* Considerar un microservicio que permita manipular publicaciones con sus respectivoscomentarios y
@@ -26,17 +36,110 @@ public class PublicationController {
         datos que ingresarán y la generación de promedios de calificaciones de las publicaciones.
     */
     @GetMapping("/publications")
-    public ResponseEntity<List<Publishing>> publications() {
-        return ResponseEntity.ok(publication.getPublications());
+    public ResponseEntity<List<PublicationsResponse>> publications() {
+        try {
+            List<Publication> publicationList = publicationService.getPublications();
+            if (publicationList.isEmpty()) {
+                return ResponseEntity.ofNullable(Collections.singletonList(
+                        new PublicationsResponse(Constant.SUCCESS, publicationList)));
+            }
+            return ResponseEntity.ok(Collections.singletonList(
+                    new PublicationsResponse(Constant.SUCCESS, publicationList)));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Collections.singletonList(
+                    new PublicationsResponse(
+                            "Error al obtener publicaciones de la bd " + e.getMessage(),
+                            null)));
+        }
+
     }
 
     @GetMapping("/publications/{id}")
-    public ResponseEntity<Publishing> getPublication(@PathVariable int id) {
-        return ResponseEntity.ok(publication.getPublication(id));
+    public ResponseEntity<Optional<PublicationResponse>> getPublication(@PathVariable Long id) {
+        try {
+            if (null == id) {
+                return ResponseEntity.badRequest().body(Optional.of(
+                        new PublicationResponse("id no puede ser null", null)));
+            }
+            Optional<Publication> publication = publicationService.getPublication(id);
+            if (publication.isEmpty()) {
+                return ResponseEntity.ofNullable(Optional.of(new PublicationResponse(
+                        "No se encontró publicación", publication)));
+            }
+            return ResponseEntity.ok(Optional.of(new PublicationResponse(Constant.SUCCESS, publication)));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Optional.of(
+                    new PublicationResponse("Error al obtener publicación " + e.getMessage(), null)));
+        }
     }
 
-    @GetMapping("/publications/average/{id}")
-    public ResponseEntity<Map<String, String>> getPublicationAverage(@PathVariable int id) {
-        return ResponseEntity.ok(publication.getAverage(id));
+    @PostMapping("/publications/add")
+    public ResponseEntity<PublicationResponse> addPublication(@RequestBody Publication publication) {
+        try {
+            if (ValidateUtil.isEmptyOrNull(publication.getTitle())
+                    || ValidateUtil.isEmptyOrNull(publication.getUser())
+                    || ValidateUtil.isEmptyOrNull(publication.getContent())) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "Title, user, content no pueden ser null o vacío", null));
+            }
+            return ResponseEntity.ok(new PublicationResponse(
+                    Constant.SUCCESS, Optional.of(publicationService.addPublication(publication))));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al ingresar la publicación " + e.getMessage(), null));
+        }
+
     }
+
+    @PutMapping("/publications/update/{id}")
+    public ResponseEntity<PublicationResponse> updatePublication(@PathVariable Long id, @RequestBody Publication publication) {
+        try {
+            if (id < 1
+                    || ValidateUtil.isEmptyOrNull(publication.getTitle())
+                    || ValidateUtil.isEmptyOrNull(publication.getUser())
+                    || ValidateUtil.isEmptyOrNull(publication.getContent())) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "id, title, user, content no pueden ser null o vacío", null));
+            }
+            if (publicationService.getPublication(id).isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new PublicationResponse("El id ingresado no existe en la bd", null));
+            }
+            publication.setId(id);
+            return ResponseEntity.ok(new PublicationResponse(
+                    Constant.SUCCESS, Optional.of(publicationService.updatePublication(publication))));
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al actualizar " + e.getMessage(),null));
+        }
+    }
+
+    @DeleteMapping("/publications/delete/{id}")
+    public ResponseEntity<PublicationResponse> deletePublication(@PathVariable Long id) {
+        try {
+            if (id < 1) {
+                return ResponseEntity.badRequest().body(new PublicationResponse(
+                        "El id ingresado debe ser mayor a cero", null));
+            }
+            Optional<Publication> publication = publicationService.getPublication(id);
+            if (publication.isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new PublicationResponse("El id ingresado no existe en la bd", null));
+            }
+            publicationService.deletePublication(id);
+            return ResponseEntity.ok(
+                    new PublicationResponse(Constant.SUCCESS, publication));
+        } catch (DataIntegrityViolationException e) {
+            // debido a que no me queda tiempo, solo valide que no se pueda borar, con mas tiempo implementaria borrar en cascada
+            return ResponseEntity.internalServerError().body(
+                    new PublicationResponse(
+                            "No se puede borrar la publicacion debido a que tiene calificaiones o comentarios",
+                            null));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(new PublicationResponse(
+                    "Error al eliminar publicación " + e.getMessage(),null));
+        }
+    }
+
 }
