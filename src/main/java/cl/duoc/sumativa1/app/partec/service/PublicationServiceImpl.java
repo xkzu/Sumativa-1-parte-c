@@ -37,4 +37,9 @@ public class PublicationServiceImpl implements PublicationService {
         return repository.saveAndFlush(publication);
     }
 
+    @Override
+    public void deletePublication(Long id) {
+        repository.deleteById(id);
+    }
+
 }
