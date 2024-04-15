@@ -9,11 +9,14 @@ import cl.duoc.sumativa1.app.partec.util.Constant;
 import cl.duoc.sumativa1.app.partec.util.ValidateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Optional;
 
 @RestController
 public class CommentController {
@@ -59,10 +62,30 @@ public class CommentController {
                 return ResponseEntity.ofNullable(
                         new CommentResponse("idPublication no existe en bd", null));
             }
-            return ResponseEntity.ok(new CommentResponse(Constant.SUCCESS, commentService.addComment(comment)));
+            return ResponseEntity.ok(
+                    new CommentResponse(Constant.SUCCESS, Optional.ofNullable(commentService.addComment(comment))));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(
                     new CommentResponse("Error al agregar comentario " + e.getMessage(), null));
+        }
+    }
+
+    @DeleteMapping("comments/delete/{id}")
+    public ResponseEntity<CommentResponse> deleteComment(@PathVariable Long id) {
+        try {
+            if (id < 1) {
+                return ResponseEntity.badRequest().body(
+                        new CommentResponse("id no puede ser menor a 1", null));
+            }
+            if (commentService.getCommentByid(id).isEmpty()) {
+                return ResponseEntity.ofNullable(
+                        new CommentResponse("No se encontra id en la bd", null));
+            }
+            commentService.deleteComment(id);
+            return ResponseEntity.ok(new CommentResponse(Constant.SUCCESS, commentService.getCommentByid(id)));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(
+                    new CommentResponse("Error al eliminar " + e.getMessage(), null));
         }
     }
 }
