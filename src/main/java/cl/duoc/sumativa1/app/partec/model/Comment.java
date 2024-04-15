@@ -20,10 +20,10 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    private int id;
+    private long id;
 
     @Column(name = "publication_id")
-    private int idPublication;
+    private long idPublication;
 
     @Column(name = "comments")
     private String comments;
