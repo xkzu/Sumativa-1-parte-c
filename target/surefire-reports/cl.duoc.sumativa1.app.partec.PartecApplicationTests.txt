@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: cl.duoc.sumativa1.app.partec.PartecApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.969 s -- in cl.duoc.sumativa1.app.partec.PartecApplicationTests
